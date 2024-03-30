@@ -51,6 +51,19 @@ public class EntryController {
         return entryService.getAnswerListForAnEntry(entryId);
     }
 
+    @Operation(summary = "Add an Entry", description = "Add an entry")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Entry addEntry(@RequestBody Entry entry) {
+        return entryService.addAnEntry(entry);
+    }
+
+    @Operation(summary = "Update an Entry", description = "Update an entry")
+    @PutMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Entry updateEntry(@RequestBody Entry entry) {
+        return entryService.updateAnEntry(entry);
+    }
 
 }
 

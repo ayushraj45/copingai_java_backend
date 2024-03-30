@@ -1,0 +1,27 @@
+    public String createJournalingExercise(@RequestParam List<ChatMessage> convo) {
+        List<ChatMessage> conversation = new ArrayList<>();
+
+        OpenAiService service = new OpenAiService(apiKey, Duration.ofSeconds(60));
+        ChatMessage message1 = new ChatMessage("system", "You are a guided journaling expert. Read this conversation and suggest one Journaling Prompt which will help the user reflect, learn and feel the benefits of journaling. Make sure to give plenty of content to write about. You must ONLY respond with the journaling prompt.");
+        conversation.add(message1);
+        conversation.addAll(convo);
+
+        ChatCompletionRequest completionRequest = ChatCompletionRequest
+                .builder()
+                .messages(conversation)
+                .model(model)
+                .temperature(1.0)
+                .maxTokens(1500)
+                .frequencyPenalty(0.0)
+                .presencePenalty(0.0)
+                .n(1)
+                .build();
+        List<ChatCompletionChoice> choices = service.createChatCompletion(completionRequest).getChoices();
+        return choices.get(0).getMessage().getContent();
+//        StringBuilder returnStringBuilder = new StringBuilder();
+//        for (ChatCompletionChoice choice : choices) {
+//            returnStringBuilder.append(choice.getMessage().getContent()).append(System.lineSeparator());
+//        }
+//
+//        return returnStringBuilder.toString();
+    }

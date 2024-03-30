@@ -1,9 +1,8 @@
 package com.example.copingai.entities;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,19 +10,29 @@ public class Entry {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "user_id")
+    private Long userId;
     private String title;
     private String initFeeling;
-    private List<String> questions;
-    private List<String> answers;
+    @ElementCollection
+    @CollectionTable(name = "entry_questions", joinColumns = @JoinColumn(name = "entry_id"))
+    @Column(name = "questions")
+    private List<String> questions = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "entry_answers", joinColumns = @JoinColumn(name = "entry_id"))
+    @Column(name = "answers")
+    private List<String> answers = new ArrayList<>();
     private String content;
     private int questionCount;
 
     //Constructor
     public Entry() {
+        this.questions = new ArrayList<>();
+        this.answers = new ArrayList<>();
     }
 
-    public Entry(String initFeeling) {
-        this.initFeeling = initFeeling;
+    public Entry(Long userId) {
+        this.userId = userId;
     }
 
     //Setters and Getters
@@ -56,12 +65,21 @@ public class Entry {
         this.questions = questions;
     }
 
+    public void addQuestion (String question) {
+        questions.add(question);
+    }
+
     public List<String> getAnswers() {
         return answers;
     }
 
     public void setAnswers(List<String> answers) {
         this.answers = answers;
+    }
+
+    public void addAnswer (String answer){
+        answers.add(answer);
+        setAnswers(answers);
     }
 
     public String getContent() {
@@ -78,6 +96,14 @@ public class Entry {
 
     public void setQuestionCount(int questionCount) {
         this.questionCount = questionCount;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }
 

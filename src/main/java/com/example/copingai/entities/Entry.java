@@ -1,5 +1,6 @@
 package com.example.copingai.entities;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -15,15 +16,17 @@ public class Entry {
     private String title;
     private String initFeeling;
     @ElementCollection
+    @Schema(example = "[]")
     @CollectionTable(name = "entry_questions", joinColumns = @JoinColumn(name = "entry_id"))
     @Column(name = "questions")
-    private List<String> questions = new ArrayList<>();
+    private List<String> questions;
     @ElementCollection
+    @Schema(example = "[]")
     @CollectionTable(name = "entry_answers", joinColumns = @JoinColumn(name = "entry_id"))
     @Column(name = "answers")
-    private List<String> answers = new ArrayList<>();
+    private List<String> answers;
     private String content;
-    private int questionCount;
+    private int questionCount=0;
 
     //Constructor
     public Entry() {
@@ -31,9 +34,9 @@ public class Entry {
         this.answers = new ArrayList<>();
     }
 
-    public Entry(Long userId) {
-        this.userId = userId;
-    }
+//    public Entry(Long userId) {
+//        this.userId = userId;
+//    }
 
     //Setters and Getters
 
@@ -67,6 +70,7 @@ public class Entry {
 
     public void addQuestion (String question) {
         questions.add(question);
+        setQuestions(questions);
     }
 
     public List<String> getAnswers() {

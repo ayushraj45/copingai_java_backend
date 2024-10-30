@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +22,11 @@ public class User {
 
     private String username;
 
-    private int maxQuestions = 5;
+    private int maxQuestions = 3;
 
     private String email;
 
-
+    private String firebaseUID;
 
     private String password;
 
@@ -37,6 +38,7 @@ public class User {
 
     private LocalDateTime createdAt;
 
+    private int remainingFreeEntries;
     private LocalDateTime updatedAt;
 
     private String providerId;
@@ -49,8 +51,32 @@ public class User {
     //constructors
 
     public User() {
+        this.remainingFreeEntries = 10;
+        this.updatedAt = LocalDateTime.now();
     }
 
+    public boolean canMakeFreeEntry() {
+        resetEntriesIfNeeded();
+        if (remainingFreeEntries > 0) {
+            setRemainingFreeEntries(remainingFreeEntries-1);
+            return true;
+        }
+        return false;
+    }
+
+    private void resetEntriesIfNeeded() {
+        LocalDateTime now = LocalDateTime.now();
+        if (updatedAt == null) {
+            updatedAt = now;
+            remainingFreeEntries = 10;
+            return;
+        }
+        long daysSinceLastReset = ChronoUnit.DAYS.between(updatedAt, now);
+        if (daysSinceLastReset >= 7) {
+            remainingFreeEntries = 10;
+            updatedAt = now;
+        }
+    }
 
     // Getters and setters for each field
 
@@ -66,8 +92,11 @@ public class User {
         this.maxQuestions = maxQuestions;
     }
 
+    public int getRemainingFreeEntries() { resetEntriesIfNeeded(); return remainingFreeEntries;}
+
     public void addAnEntry (Long entryId){
         entryIds.add(entryId);
+        setRemainingFreeEntries(remainingFreeEntries-1);
         setEntryIds(this.entryIds);
     }
 
@@ -122,6 +151,9 @@ public class User {
         return lastLogin;
     }
 
+    public void setRemainingFreeEntries(int remainingFreeEntries) {
+        this.remainingFreeEntries = remainingFreeEntries;
+    }
 
     public String getSubscriptionStatus() {
         return subscriptionStatus;

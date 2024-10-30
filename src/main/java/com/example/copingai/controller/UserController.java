@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 @Tag(name = "User Api")
 @RequestMapping("/users")
@@ -31,8 +31,23 @@ public class UserController {
         return appUserService.findAllAppUsers();
     }
 
+    @Operation(summary = "Get an app user by ID ", description = "Returns an app user by ID")
+    @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public User getAppUserById(@PathVariable Long userId){
+        return appUserService.getAppUserById(userId);
+    }
+
+    @Operation(summary = "Get an app user by Provider ID ", description = "Returns an app user by provider ID")
+    @GetMapping("/provider/{providerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public User getUserByProviderId(@PathVariable String providerId){
+        return appUserService.findByProviderId(providerId);
+    }
+
+
     @Operation(summary = "Get a list of all app user's entries", description = "Returns a list of all entries by a users")
-    @GetMapping("/{userId}/entries")
+    @GetMapping("/entries/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public List<Entry> getAllUserEntries(@PathVariable Long userId){
         return appUserService.getAllUserEntries(userId);

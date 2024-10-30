@@ -31,6 +31,7 @@ public class EntryService {
     public Entry findAnEntryById(Long entryId) {
         return entryRepository.findById(entryId)
                 .orElseThrow(() -> new EntityNotFoundException("Entry not found"));}
+
     public int getQuestionCountForAnEntry(Long entryId) {
         if (entryId == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to return cannot have an empty ID");
@@ -73,6 +74,21 @@ public class EntryService {
         entryRepository.save(entry);
     }
 
+
+    public void deleteEntryAllQuestionsAndAnswers(Long entryId) {
+        if (entryId == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to return cannot have an empty ID");
+        Entry entry = entryRepository.findById(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("Entry not found"));
+        List<String> emptyList = entry.getQuestions();
+        List<String> emptyAnsList = entry.getQuestions();
+        emptyList.remove(0);
+        emptyAnsList.remove(0);
+        entry.setAnswers(emptyAnsList);
+        entry.setQuestions(emptyList);
+        entryRepository.save(entry);
+    }
+
     public void increaseQuestionCount(Long entryId){
         if (entryId == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to return cannot have an empty ID");
@@ -93,13 +109,29 @@ public class EntryService {
         }
         User user = userRepository.findById(entry.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        entry.setUserId(user.getId());
-        Entry returnEntry = entryRepository.save(entry);
-        user.addAnEntry(returnEntry.getId());
-        userRepository.save(user);
-        return returnEntry;
+        int freeEntries = user.getRemainingFreeEntries();
+        String subscriptionStatus = user.getSubscriptionStatus();
+        if(subscriptionStatus != "free" || subscriptionStatus != ""){
+            entry.setUserId(user.getId());
+            Entry returnEntry = entryRepository.save(entry);
+            user.addAnEntry(returnEntry.getId());
+            userRepository.save(user);
+            return returnEntry;
+        }
+        else if(subscriptionStatus == "free" || subscriptionStatus == "" && freeEntries > 0 ){
+            entry.setUserId(user.getId());
+            Entry returnEntry = entryRepository.save(entry);
+            user.addAnEntry(returnEntry.getId());
+            user.setRemainingFreeEntries(freeEntries-1);
+            userRepository.save(user);
+            return returnEntry;
+        }
+        else
+        { throw new RuntimeException ("You've used all your free entries for this week.");}
     }
+    private void makeAnEntry(){
 
+    }
     public Entry updateAnEntry(Entry entry) {
         if (entry == null || entry.getId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to update must have an id");
@@ -113,17 +145,26 @@ public class EntryService {
         return entryRepository.save(entry);
     }
 
-    public void deleteAnEntry(Long entryId) {
+    public void deleteAnEntry(Long entryId, Long userID) {
         if (entryId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to delete must have an id");
         } else if (!entryRepository.existsById(entryId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry to delete cannot be found");
         } else {
-            User user = userRepository.findById(entryId)
+            User user = userRepository.findById(userID)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
             if(user.deleteAnEntry(entryId)) {entryRepository.deleteById(entryId);}
             else new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry could not be deleted");
         }
 
+    }
+
+    public String getJournalingPromptForAnEntry(Long entryId) {
+        if (entryId == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to return cannot have an empty ID");
+        Entry entry = entryRepository.findById(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("Entry not found"));
+        List<String> allquestions = entry.getQuestions();
+        return allquestions.get(allquestions.size()-1);
     }
 }

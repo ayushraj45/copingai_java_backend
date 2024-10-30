@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 @Tag(name = "Entry Api")
 @RequestMapping("/entry")
@@ -23,6 +23,13 @@ public class EntryController {
     @Autowired
     public EntryController(EntryService entryService) {
         this.entryService = entryService;
+    }
+
+    @Operation(summary = "Get an entry by ID", description = "Returns an entry from ID")
+    @GetMapping("/{entryID}")
+    @ResponseStatus(HttpStatus.OK)
+    public Entry getEntryById(@PathVariable Long entryID) {
+        return entryService.findAnEntryById(entryID);
     }
 
     @Operation(summary = "Get a list of all entries", description = "Returns a list of all entries")
@@ -43,6 +50,13 @@ public class EntryController {
     @ResponseStatus(HttpStatus.OK)
     public List<String> getEntryQuestionsList(@PathVariable Long entryId) {
         return entryService.getQuestionListForAnEntry(entryId);
+    }
+
+    @Operation(summary = "Get an entrys Journaling prompt ", description = "Returns the Journaling Prompt of an entry")
+    @GetMapping("/{entryId}/journalingprompt")
+    @ResponseStatus(HttpStatus.OK)
+    public String getEntryJournalingPrompt(@PathVariable Long entryId) {
+        return entryService.getJournalingPromptForAnEntry(entryId);
     }
     @Operation(summary = "Get an entrys Answer", description = "Returns the list of answers of an entry")
     @GetMapping("/{entryId}/answers")
@@ -65,6 +79,12 @@ public class EntryController {
         return entryService.updateAnEntry(entry);
     }
 
+    @Operation(summary = "Delete an Entry", description = "Delete an entry")
+    @DeleteMapping("/user/{userId}/{entryId}/")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void deleteEntry(@PathVariable Long entryId,@PathVariable Long userId) {
+         entryService.deleteAnEntry(entryId, userId);
+    }
 }
 
 

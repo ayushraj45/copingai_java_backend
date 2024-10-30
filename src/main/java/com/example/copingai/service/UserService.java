@@ -33,6 +33,17 @@ public class UserService {
         return appUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
+
+    public User findByProviderId(String providerId) {
+        if(providerId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to find must have an id");
+        }
+        User user = appUserRepository.findByProviderId(providerId);
+        if(user == null ){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser with that Provider ID not found");
+        }
+        else return user;
+    }
     public List<Entry> getAllUserEntries(Long userId) {
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to delete must have an id");
@@ -94,6 +105,18 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "AppUser to delete cannot be found");
         } else {
             appUserRepository.deleteById(appUserId);
+        }
+    }
+
+    public User getAppUserById(Long userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User to find must have an ID");
+        } else if (!appUserRepository.existsById(userId)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "AppUser cannot be found");
+        } else {
+            User user =  appUserRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+            return user;
         }
     }
 }

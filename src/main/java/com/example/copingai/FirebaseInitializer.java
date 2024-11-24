@@ -23,7 +23,9 @@ public class FirebaseInitializer {
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 
-            FirebaseApp.initializeApp(options);
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

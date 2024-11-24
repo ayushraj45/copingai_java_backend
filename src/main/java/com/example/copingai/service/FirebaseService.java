@@ -8,13 +8,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class FirebaseService {
 
-    public String decodeToken(String token){
+    public String decodeToken(String token) throws FirebaseAuthException {
         try {
-        FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-        return decodedToken.getUid();
-    } catch (FirebaseAuthException e) {
-            e.printStackTrace();
-            return null;
+            // Remove "Bearer " prefix if it exists
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            // Verify the token
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
+            String uid = decodedToken.getUid();
+            return uid;
+        } catch (FirebaseAuthException e) {
+            throw e;
         }
     }
 }

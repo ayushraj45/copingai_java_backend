@@ -1,6 +1,8 @@
 package com.example.copingai.controller;
 
+import com.example.copingai.entities.User;
 import com.example.copingai.service.FirebaseService;
+import com.example.copingai.service.UserService;
 import com.google.firebase.auth.FirebaseAuthException;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,20 +29,28 @@ public class FirebaseController {
     @Autowired
     private FirebaseService firebaseService;
 
-    @PostMapping("/decodeToken")
-    @Operation(summary = "Decode Firebase token", description = "Decodes a Firebase token and returns the UID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Token decoded successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid token")
-    })
-    public ResponseEntity<?> decodeToken(
-            @RequestHeader(value = "Authorization", required = true)
-            @Parameter(description = "Firebase ID token with Bearer prefix",
-                    required = true,
-                    example = "Bearer eyJhbGciOiJSUzI1NiIs...")
-            String token) throws FirebaseAuthException {
+    @Autowired
+    private UserService userService;
+
+    @PostMapping("/login")
+    public ResponseEntity<User> firebaseLogin (
+            @RequestHeader(name = "Authorization") String token)
+            throws FirebaseAuthException {
+        System.out.println("Received token: " + token);
         String uid = firebaseService.decodeToken(token);
-        return ResponseEntity.ok().body(uid);
+        User loginUser = userService.findByProviderId(uid);
+        return ResponseEntity.ok(loginUser);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<User> fireBaseRegister(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody User appUser)
+            throws FirebaseAuthException {
+        System.out.println("Received token: " + token);
+        String uid = firebaseService.decodeToken(token);
+        appUser.setProviderId(uid);
+        return ResponseEntity.ok(userService.addAnAppUser((appUser)));
     }
 }
 

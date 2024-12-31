@@ -1,6 +1,7 @@
 package com.example.copingai.controller;
 
 import com.example.copingai.entities.User;
+import com.example.copingai.service.ExpoPushNotificationService;
 import com.example.copingai.service.FirebaseService;
 import com.example.copingai.service.UserService;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -32,6 +33,9 @@ public class FirebaseController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ExpoPushNotificationService expoPushNotificationService;
+
     @PostMapping("/login")
     public ResponseEntity<User> firebaseLogin (
             @RequestHeader(name = "Authorization") String token)
@@ -50,7 +54,11 @@ public class FirebaseController {
         System.out.println("Received token: " + token);
         String uid = firebaseService.decodeToken(token);
         appUser.setProviderId(uid);
-        return ResponseEntity.ok(userService.addAnAppUser((appUser)));
+        User newUser = userService.addAnAppUser(appUser);
+        String expoToken = newUser.getFirebaseToken();
+
+        expoPushNotificationService.sendPushNotification(expoToken, "Welcome to your Journey!", "Express and learn, make your first entry!");
+        return ResponseEntity.ok(newUser);
     }
 }
 

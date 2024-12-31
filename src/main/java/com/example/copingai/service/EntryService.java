@@ -19,6 +19,9 @@ public class EntryService {
     public UserRepository userRepository;
 
     @Autowired
+    private ExpoPushNotificationService expoPushNotificationService;
+
+    @Autowired
     public EntryService(EntryRepository entryRepository, UserRepository userRepository) {
         this.entryRepository = entryRepository;
         this.userRepository=userRepository;
@@ -116,6 +119,7 @@ public class EntryService {
             Entry returnEntry = entryRepository.save(entry);
             user.addAnEntry(returnEntry.getId());
             userRepository.save(user);
+            entryNotification(entry.getUserId());
             return returnEntry;
         }
         else if(subscriptionStatus == "free" || subscriptionStatus == "" && freeEntries > 0 ){
@@ -124,13 +128,30 @@ public class EntryService {
             user.addAnEntry(returnEntry.getId());
             user.setRemainingFreeEntries(freeEntries-1);
             userRepository.save(user);
+            entryNotification(entry.getUserId());
             return returnEntry;
         }
         else
         { throw new RuntimeException ("You've used all your free entries for this week.");}
     }
-    private void makeAnEntry(){
 
+    private void entryNotification (Long userId) {
+        User entryMaker = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        int entries = (entryMaker.getEntryIds()).size();
+        if(entries == 1) {
+            expoPushNotificationService.sendPushNotification(entryMaker.getFirebaseToken(), "You did it!", "Congratulations on making your first entry!");
+        }
+        else if(entries == 10) {
+            expoPushNotificationService.sendPushNotification(entryMaker.getFirebaseToken(), "It's a milestone!", "You've made 10 entries, keep the streak going!");
+        }
+        else if(entries == 25) {
+            expoPushNotificationService.sendPushNotification(entryMaker.getFirebaseToken(), "That's significant!", "Thank you for making 25 entries!");
+        }
+        else if(entries == 50) {
+            expoPushNotificationService.sendPushNotification(entryMaker.getFirebaseToken(), "You are unstoppable!", "99% of journal writers don't reach their 50th entry! You've done it! Keep it up!");
+        }
+        else return;
     }
     public Entry updateAnEntry(Entry entry) {
         if (entry == null || entry.getId() == null) {

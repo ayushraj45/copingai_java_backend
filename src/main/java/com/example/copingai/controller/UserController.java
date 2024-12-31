@@ -2,6 +2,7 @@ package com.example.copingai.controller;
 
 import com.example.copingai.entities.Entry;
 import com.example.copingai.entities.User;
+import com.example.copingai.service.ExpoPushNotificationService;
 import com.example.copingai.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,11 +18,16 @@ import java.util.List;
 @Tag(name = "User Api")
 @RequestMapping("/users")
 public class UserController {
-    private UserService appUserService;
+    private final UserService appUserService;
+    private final ExpoPushNotificationService expoPushNotificationService;
 
     @Autowired
-    public UserController(UserService appUserService) {
+    public UserController(
+            UserService appUserService,
+            ExpoPushNotificationService expoPushNotificationService
+    ) {
         this.appUserService = appUserService;
+        this.expoPushNotificationService = expoPushNotificationService;
     }
 
     @Operation(summary = "Get a list of all app users", description = "Returns a list of all app users")
@@ -80,6 +86,17 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public User updateAppUserSubscriptionStatus(@RequestBody Long appUserId, String status) {
         return appUserService.updateAnAppUserSubscriptionStatus(appUserId, status);
+    }
+
+    @Operation(summary = "send notifications to all users")
+    @PostMapping("/sendNotifs")
+    public void sendNotificationsToEveryone(@RequestParam String title, @RequestParam String body) {
+        List<String> expoTokens = appUserService.sendNotifToAllUsers(title, body);
+
+        for (String token: expoTokens
+        ) {
+            expoPushNotificationService.sendPushNotification(token,title,body);
+        }
     }
 
     @Operation(summary = "Delete an AppUser", description = "Delete an app user")

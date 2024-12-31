@@ -76,6 +76,10 @@ public class UserService {
         } else if (appUser.getId() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to add cannot contain an id");
         }
+
+        if(appUser.getFirebaseToken() != null){
+
+        }
         return appUserRepository.save(appUser);
     }
 
@@ -106,6 +110,18 @@ public class UserService {
         } else {
             appUserRepository.deleteById(appUserId);
         }
+    }
+
+    public List<String> sendNotifToAllUsers(String title, String body) {
+        List<User> users = findAllAppUsers();
+        List<String> expoTokens = new ArrayList<>();
+        for (User user: users
+             ) {
+            String userToken = user.getFirebaseToken();
+            expoTokens.add(userToken);
+        }
+
+        return expoTokens;
     }
 
     public User getAppUserById(Long userId) {

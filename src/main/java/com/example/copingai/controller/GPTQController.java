@@ -70,7 +70,7 @@ public class GPTQController {
             //entryService.deleteEntryAllQuestionsAndAnswers(entryId);
             //prompt = "I feel " + prompt;
             ChatMessage initFeeling = new ChatMessage("user", prompt);
-            String sysPrompt = "You're a journaling guide. Ask open-ended questions based on user responses. Respond only with questions. Avoid comments. Encourage reflection and detailed writing.";
+            String sysPrompt = "You're a journaling guide. Ask open-ended questions based on user responses. Respond only with questions. Avoid comments completely. Encourage reflection and detailed writing. In each of your response, only ask 1 question. Add context and ask a very elaborate question but make sure you only ask one question in your replies. If the conversation becomes nonsensical or out of context, gently nudge it back to asking questions.";
             entryService.saveEntryQuestion("system:" + sysPrompt, entryId);
             entryService.saveEntryQuestion("User:" + prompt, entryId);
             ChatMessage message1 = new ChatMessage("system",sysPrompt);

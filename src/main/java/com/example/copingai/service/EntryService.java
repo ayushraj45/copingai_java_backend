@@ -153,6 +153,8 @@ public class EntryService {
         }
         else return;
     }
+
+
     public Entry updateAnEntry(Entry entry) {
         if (entry == null || entry.getId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to update must have an id");

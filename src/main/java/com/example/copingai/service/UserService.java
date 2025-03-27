@@ -105,11 +105,18 @@ public class UserService {
     public void deleteAnAppUser(Long appUserId) {
         if (appUserId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to delete must have an id");
-        } else if (!appUserRepository.existsById(appUserId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "AppUser to delete cannot be found");
-        } else {
-            appUserRepository.deleteById(appUserId);
         }
+
+        User user = appUserRepository.findById(appUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "AppUser to delete cannot be found"));
+
+        List<Long> userEntriesId = user.getEntryIds();
+
+        if (userEntriesId != null && !userEntriesId.isEmpty()) {
+            entryRepository.deleteAllById(userEntriesId);
+        }
+
+        appUserRepository.deleteById(appUserId);
     }
 
     public List<String> sendNotifToAllUsers(String title, String body) {
@@ -120,7 +127,6 @@ public class UserService {
             String userToken = user.getFirebaseToken();
             expoTokens.add(userToken);
         }
-
         return expoTokens;
     }
 

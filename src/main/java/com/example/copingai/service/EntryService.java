@@ -7,9 +7,14 @@ import com.example.copingai.entities.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -116,6 +121,7 @@ public class EntryService {
         String subscriptionStatus = user.getSubscriptionStatus();
         if(subscriptionStatus != "free" || subscriptionStatus != ""){
             entry.setUserId(user.getId());
+            entry.setCreatedAt(LocalDateTime.now());
             Entry returnEntry = entryRepository.save(entry);
             user.addAnEntry(returnEntry.getId());
             userRepository.save(user);
@@ -124,6 +130,7 @@ public class EntryService {
         }
         else if(subscriptionStatus == "free" || subscriptionStatus == "" && freeEntries > 0 ){
             entry.setUserId(user.getId());
+            entry.setCreatedAt(LocalDateTime.now());
             Entry returnEntry = entryRepository.save(entry);
             user.addAnEntry(returnEntry.getId());
             user.setRemainingFreeEntries(freeEntries-1);
@@ -154,7 +161,42 @@ public class EntryService {
         else return;
     }
 
+    @Scheduled (cron = "0 0 */5 * * *")
+    @Transactional
+    protected  void sendStreakNotification () {
+        System.out.println("Scheduled task triggered at: " + LocalDateTime.now()); // Log to verify it's triggered
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            List<Long> entryIds = user.getEntryIds();
+            if (entryIds == null || entryIds.isEmpty() || user.getFirebaseToken() == null || user.getFirebaseToken().trim().isEmpty()) {
+                continue;
+            }
+            Long lastEntryId = Collections.max(entryIds);
+            Entry lastEntry = findAnEntryById(lastEntryId);
+            if(lastEntry == null) {
+                continue;
+            }
+            LocalDateTime createdAt = lastEntry.getCreatedAt();
+            if (createdAt == null) {
+                System.out.println("Skipping user " + user.getId() + " because last entry's createdAt is null");
+                continue;
+            }
+            long hoursSinceLastEntry = ChronoUnit.HOURS.between(createdAt, LocalDateTime.now());
 
+            if (hoursSinceLastEntry >= 40) {
+                continue;
+            } else if (hoursSinceLastEntry >= 30 && !"red".equals(lastEntry.getNotifStatus())) {
+                expoPushNotificationService.sendPushNotification(user.getFirebaseToken(), "Is everything okay? You lost your streak but...", "It's not too late! Build a meaningful self-reflection habit with Coping today!");
+                lastEntry.setNotifStatus("red");
+                entryRepository.save(lastEntry);
+            } else if (hoursSinceLastEntry >= 19 && !"orange".equals(lastEntry.getNotifStatus())) {
+                expoPushNotificationService.sendPushNotification(user.getFirebaseToken(), "Don't lose your streak!", "There is still time, take 2 minutes to write an entry now and maintain your daily streak!");
+                lastEntry.setNotifStatus("orange");
+                entryRepository.save(lastEntry);
+            }
+
+        }
+    }
     public Entry updateAnEntry(Entry entry) {
         if (entry == null || entry.getId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry to update must have an id");

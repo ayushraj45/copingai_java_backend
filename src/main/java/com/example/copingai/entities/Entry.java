@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class Entry {
     private Long userId;
     private String title;
     private String initFeeling;
+
     @ElementCollection
     @Schema(example = "[]")
     @CollectionTable(name = "entry_questions", joinColumns = @JoinColumn(name = "entry_id"))
@@ -27,6 +29,8 @@ public class Entry {
     private List<String> answers;
     private String content;
     private int questionCount=0;
+    private String notifStatus = "new";
+    private LocalDateTime createdAt;
 
     //Constructor
     public Entry() {
@@ -108,6 +112,22 @@ public class Entry {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getNotifStatus() {
+        return notifStatus;
+    }
+
+    public void setNotifStatus(String notifStatus) {
+        this.notifStatus = notifStatus;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
 

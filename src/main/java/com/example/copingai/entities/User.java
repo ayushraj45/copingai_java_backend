@@ -48,6 +48,21 @@ public class User {
     private String subscriptionStatus;
 
     private LocalDateTime lastLogin;
+
+    @ElementCollection
+    @CollectionTable(name = "user_emotionplans", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "emotionplan_id")
+    private List<Long> emotionPlanIds = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "user_assessments", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "assessment_id")
+    private List<Long> assessmentIds = new ArrayList<>();
+    private Long currentEmotionPlanId; // Shortcut to active plan
+    private int currentDomainScore; // Optional: can store last average or active domain score
+    private LocalDateTime lastAssessmentTaken;
+    private LocalDateTime lastActionPlanStarted;
+
     //constructors
 
     public User() {

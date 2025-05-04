@@ -31,6 +31,7 @@ public class Entry {
     private int questionCount=0;
     private String notifStatus = "new";
     private LocalDateTime createdAt;
+    private long wordCount = 0;
 
     //Constructor
     public Entry() {
@@ -128,6 +129,14 @@ public class Entry {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public long getWordCount() {
+        return wordCount;
+    }
+
+    public void setWordCount(long wordCount) {
+        this.wordCount = wordCount;
     }
 }
 

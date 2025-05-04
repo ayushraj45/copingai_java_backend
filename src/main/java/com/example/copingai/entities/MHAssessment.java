@@ -32,6 +32,14 @@ public class MHAssessment {
         this.timeTaken = LocalDateTime.now();
     }
 
+    //Functions
+
+    public void addAnAssessmentQuestion (Long assessmentQId){
+        assessmentsQuestionIds.add(assessmentQId);
+        setAssessmentsQuestionIds(this.assessmentsQuestionIds);
+    }
+
+    //Getters and Setters
     public List<Long> getAssessmentsQuestionIds() {
         return assessmentsQuestionIds;
     }
@@ -118,5 +126,9 @@ public class MHAssessment {
 
     public void setSelfEsteemScore(int selfEsteemScore) {
         this.selfEsteemScore = selfEsteemScore;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

@@ -125,6 +125,7 @@ public class EntryService {
             Entry returnEntry = entryRepository.save(entry);
             user.addAnEntry(returnEntry.getId());
             userRepository.save(user);
+            setEntryStreak(user.getId());
             entryNotification(entry.getUserId());
             return returnEntry;
         }
@@ -135,11 +136,40 @@ public class EntryService {
             user.addAnEntry(returnEntry.getId());
             user.setRemainingFreeEntries(freeEntries-1);
             userRepository.save(user);
+            setEntryStreak(user.getId());
             entryNotification(entry.getUserId());
             return returnEntry;
         }
         else
         { throw new RuntimeException ("You've used all your free entries for this week.");}
+    }
+
+    private void setEntryStreak (Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getLastEntryTime() == null) {
+            // First entry ever, start the streak at 1
+            user.setStreak(1);
+        } else {
+            LocalDateTime lastEntryTime = user.getLastEntryTime();
+            if (now.isBefore(lastEntryTime.plusHours(24))) {
+                // Entry is within the 24-hour window, increment streak
+                user.setStreak(user.getStreak() + 1);
+            } else {
+                // Entry is more than 24 hours after the last one, streak is broken, start a new streak of 1
+                user.setStreak(1);
+            }
+        }
+        user.setLastEntryTime(now);
+        userRepository.save(user);
+    }
+
+    private void setStreakToZero (Long entryId) {
+        User user = userRepository.findById(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setStreak(0);
+        userRepository.save(user);
     }
 
     private void entryNotification (Long userId) {
@@ -188,7 +218,9 @@ public class EntryService {
             } else if (hoursSinceLastEntry >= 30 && !"red".equals(lastEntry.getNotifStatus())) {
                 expoPushNotificationService.sendPushNotification(user.getFirebaseToken(), "Is everything okay? You lost your streak but...", "It's not too late! Build a meaningful self-reflection habit with Coping today!");
                 lastEntry.setNotifStatus("red");
+
                 entryRepository.save(lastEntry);
+                setStreakToZero(lastEntryId);
             } else if (hoursSinceLastEntry >= 19 && !"orange".equals(lastEntry.getNotifStatus())) {
                 expoPushNotificationService.sendPushNotification(user.getFirebaseToken(), "Don't lose your streak!", "There is still time, take 2 minutes to write an entry now and maintain your daily streak!");
                 lastEntry.setNotifStatus("orange");
@@ -207,6 +239,7 @@ public class EntryService {
         }
         User user = userRepository.findById(entry.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        calculateAndSetWordCount(entry.getId());
         return entryRepository.save(entry);
     }
 
@@ -223,6 +256,62 @@ public class EntryService {
         }
 
     }
+
+    @Transactional // Keep Transactional as it involves fetching and saving the entity
+    public void calculateAndSetWordCount(Long entryId) {
+        Entry entry = entryRepository.findById(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("Entry not found"));
+        int totalWordCount = 0;
+
+        // Helper lambda for calculating word count by splitting by space
+        // Handles null, empty, or whitespace-only strings
+        java.util.function.Function<String, Integer> simpleWordCount = (text) -> {
+            if (text == null || text.trim().isEmpty()) {
+                return 0;
+            }
+            // Split by one or more whitespace characters
+            String[] words = text.trim().split("\\s+");
+            // The split method might return an array with one empty string if the input was just whitespace,
+            // so we check the length of the first element if the array is not empty.
+            if (words.length == 1 && words[0].isEmpty()) {
+                return 0;
+            }
+            return words.length;
+        };
+
+
+        // 1. Add word count from the 'content' field
+        totalWordCount += simpleWordCount.apply(entry.getContent());
+
+        // 2. Add word count from 'User:' parts of the 'questions' list
+        List<String> questions = entry.getQuestions();
+        if (questions != null) {
+            for (String turn : questions) {
+                // Check if the string starts with "User:" after trimming leading/trailing whitespace
+                if (turn != null && turn.trim().startsWith("User:")) {
+                    // Find the index after "User:"
+                    int startIndex = turn.indexOf("User:") + "User:".length();
+                    // Ensure there's text after "User:" and handle potential space
+                    if (startIndex < turn.length()) {
+                        // Get substring, trim leading/trailing space, and calculate word count
+                        String userText = turn.substring(startIndex).trim();
+                        totalWordCount += simpleWordCount.apply(userText);
+                    }
+                    // If it's just "User:", the substring will be empty after trim, word count will be 0, which is correct.
+                }
+            }
+        }
+
+        // Set the calculated total word count to the entry, overwriting the previous value
+        entry.setWordCount(totalWordCount);
+
+        // Save the entry with the updated word count
+        entryRepository.save(entry);
+        User user = userRepository.findById(entry.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setWordsWritten(entryRepository.getTotalWordCount(user.getId()));
+    }
+
 
     public String getJournalingPromptForAnEntry(Long entryId) {
         if (entryId == null)

@@ -32,19 +32,23 @@ public class AssessmentQuestion {
         this.questionText = questionText;
     }
 
-    public String getqDomain() {
+    public String getQDomain() {
         return qDomain;
     }
 
-    public void setqDomain(String qDomain) {
+    public void setQDomain(String qDomain) {
         this.qDomain = qDomain;
     }
 
-    public int getqAnswer() {
+    public int getQAnswer() {
         return qAnswer;
     }
 
-    public void setqAnswer(int qAnswer) {
+    public void setQAnswer(int qAnswer) {
         this.qAnswer = qAnswer;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

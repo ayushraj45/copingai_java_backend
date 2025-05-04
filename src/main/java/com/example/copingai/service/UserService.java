@@ -119,6 +119,13 @@ public class UserService {
         appUserRepository.deleteById(appUserId);
     }
 
+    private void setTotalWordCount(Long userId){
+        User user = appUserRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "AppUser to delete cannot be found"));
+        user.setWordsWritten(entryRepository.getTotalWordCount(userId));
+        appUserRepository.save(user);
+    }
+
     public List<String> sendNotifToAllUsers(String title, String body) {
         List<User> users = findAllAppUsers();
         List<String> expoTokens = new ArrayList<>();

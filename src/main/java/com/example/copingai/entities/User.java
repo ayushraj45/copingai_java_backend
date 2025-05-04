@@ -49,6 +49,10 @@ public class User {
 
     private LocalDateTime lastLogin;
 
+    private Long wordsWritten;
+    private int streak = 0;
+    private LocalDateTime lastEntryTime;
+
     @ElementCollection
     @CollectionTable(name = "user_emotionplans", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "emotionplan_id")
@@ -115,6 +119,17 @@ public class User {
         setEntryIds(this.entryIds);
     }
 
+    public void addAnAssessment (Long assessmentId){
+        assessmentIds.add(assessmentId);
+        setAssessmentIds(this.assessmentIds);
+    }
+
+    public void addEmotionPlan(Long planId) {
+        emotionPlanIds.add(planId);
+        setEmotionPlanIds(this.emotionPlanIds);
+        setCurrentEmotionPlanId(planId);
+    }
+
     public boolean deleteAnEntry(Long entryId){
         boolean isDeleted = entryIds.remove(entryId);
         setEntryIds(this.entryIds);
@@ -160,7 +175,61 @@ public class User {
         return firebaseToken;
     }
 
+    public String getFirebaseUID() {
+        return firebaseUID;
+    }
 
+    public void setFirebaseUID(String firebaseUID) {
+        this.firebaseUID = firebaseUID;
+    }
+
+    public List<Long> getEmotionPlanIds() {
+        return emotionPlanIds;
+    }
+
+    public void setEmotionPlanIds(List<Long> emotionPlanIds) {
+        this.emotionPlanIds = emotionPlanIds;
+    }
+
+    public List<Long> getAssessmentIds() {
+        return assessmentIds;
+    }
+
+    public void setAssessmentIds(List<Long> assessmentIds) {
+        this.assessmentIds = assessmentIds;
+    }
+
+    public Long getCurrentEmotionPlanId() {
+        return currentEmotionPlanId;
+    }
+
+    public void setCurrentEmotionPlanId(Long currentEmotionPlanId) {
+        this.currentEmotionPlanId = currentEmotionPlanId;
+    }
+
+    public int getCurrentDomainScore() {
+        return currentDomainScore;
+    }
+
+    public void setCurrentDomainScore(int currentDomainScore) {
+        this.currentDomainScore = currentDomainScore;
+    }
+
+    public LocalDateTime getLastAssessmentTaken() {
+        return lastAssessmentTaken;
+    }
+
+    public void setLastAssessmentTaken(LocalDateTime lastAssessmentTaken) {
+        this.lastAssessmentTaken = lastAssessmentTaken;
+    }
+
+    public LocalDateTime getLastActionPlanStarted() {
+        return lastActionPlanStarted;
+    }
+
+    public void setLastActionPlanStarted(LocalDateTime lastActionPlanStarted) {
+        this.lastActionPlanStarted = lastActionPlanStarted;
+    }
 
     public LocalDateTime getLastLogin() {
         return lastLogin;
@@ -228,5 +297,29 @@ public class User {
 
     public void setEntryIds(List<Long> entryIds) {
         this.entryIds = entryIds;
+    }
+
+    public Long getWordsWritten() {
+        return wordsWritten;
+    }
+
+    public void setWordsWritten(Long wordsWritten) {
+        this.wordsWritten = wordsWritten;
+    }
+
+    public int getStreak() {
+        return streak;
+    }
+
+    public void setStreak(int streak) {
+        this.streak = streak;
+    }
+
+    public LocalDateTime getLastEntryTime() {
+        return lastEntryTime;
+    }
+
+    public void setLastEntryTime(LocalDateTime lastEntryTime) {
+        this.lastEntryTime = lastEntryTime;
     }
 }

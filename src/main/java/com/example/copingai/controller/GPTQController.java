@@ -80,6 +80,7 @@ public class GPTQController {
         }
         else if(questionCount == maxQuestion){
             entryService.saveEntryQuestion("User:" + prompt, entryId);
+            entryService.calculateAndSetWordCount(entryId);
             ChatMessage message1 = new ChatMessage("system", """
                     You are a guided journaling expert. Read this conversation and respond only with a Journaling Prompt which will help the user reflect, learn and feel the benefits of writing a journal entry based on the conversation. Keep your prompt relevant to the conversation, think about what could benefit the user based on the responses, don't give out too many sentences, keep it focussed, the prompt should be very write-able.     
                     You must use this format for your answer: 

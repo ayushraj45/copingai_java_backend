@@ -1,6 +1,8 @@
 package com.example.copingai.controller;
 
+import com.example.copingai.entities.EmotionActionPlan;
 import com.example.copingai.entities.Entry;
+import com.example.copingai.entities.MHAssessment;
 import com.example.copingai.entities.User;
 import com.example.copingai.service.ExpoPushNotificationService;
 import com.example.copingai.service.UserService;
@@ -57,6 +59,20 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public List<Entry> getAllUserEntries(@PathVariable Long userId){
         return appUserService.getAllUserEntries(userId);
+    }
+
+    @Operation(summary = "Get a list of all app user's MHAssessments", description = "Returns a list of all MHAssessments by a users")
+    @GetMapping("/assessments/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<MHAssessment> getUserAssessments(@PathVariable Long userId){
+        return appUserService.getAllUserAssessments(userId);
+    }
+
+    @Operation(summary = "Get a list of all app user's EmotionActionPlans", description = "Returns a list of all EmotionActionPlans by a users")
+    @GetMapping("/plans/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<EmotionActionPlan> getUserPlans(@PathVariable Long userId){
+        return appUserService.getAllUserEmotionPlans(userId);
     }
 
     @Operation(summary = "Get an app user's subscription status", description = "Get an app user's subscription status")

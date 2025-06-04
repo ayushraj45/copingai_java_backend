@@ -1,8 +1,12 @@
 package com.example.copingai.service;
 
+import com.example.copingai.data.EmotionActionPlanRepository;
 import com.example.copingai.data.EntryRepository;
+import com.example.copingai.data.MHAssessmentRepository;
 import com.example.copingai.data.UserRepository;
+import com.example.copingai.entities.EmotionActionPlan;
 import com.example.copingai.entities.Entry;
+import com.example.copingai.entities.MHAssessment;
 import com.example.copingai.entities.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +22,15 @@ public class UserService {
 
     private final UserRepository appUserRepository;
     private final EntryRepository entryRepository;
+    private final MHAssessmentRepository mhAssessmentRepository;
+    private final EmotionActionPlanRepository emotionActionPlanRepository;
 
     @Autowired
-    public UserService(UserRepository appUserRepository, EntryRepository entryRepository) {
+    public UserService(UserRepository appUserRepository, EntryRepository entryRepository,MHAssessmentRepository mhAssessmentRepository, EmotionActionPlanRepository emotionActionPlanRepository) {
         this.appUserRepository = appUserRepository;
         this.entryRepository = entryRepository;
+        this.emotionActionPlanRepository = emotionActionPlanRepository;
+        this.mhAssessmentRepository = mhAssessmentRepository;
     }
 
     // Methods
@@ -46,7 +54,7 @@ public class UserService {
     }
     public List<Entry> getAllUserEntries(Long userId) {
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to delete must have an id");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to fetch entries for must have an id");
         }
         User user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -58,6 +66,38 @@ public class UserService {
             userEntries.add(userEntry);
         }
         return userEntries;
+    }
+
+    public List<MHAssessment> getAllUserAssessments(Long userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to fetch assessments for must have an id");
+        }
+        User user = appUserRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        List<Long> userAssessmentIds = user.getAssessmentIds();
+        List<MHAssessment> userAssessments = new ArrayList<>();
+        for (Long assessmentId: userAssessmentIds) {
+            MHAssessment userAssessment = mhAssessmentRepository.findById(assessmentId)
+                    .orElseThrow(() -> new EntityNotFoundException("assessment not found"));
+            userAssessments.add(userAssessment);
+        }
+        return userAssessments;
+    }
+
+    public List<EmotionActionPlan> getAllUserEmotionPlans(Long userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AppUser to fetch plans for must have an id");
+        }
+        User user = appUserRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        List<Long> userPlanIds = user.getEmotionPlanIds();
+        List<EmotionActionPlan> userPlans = new ArrayList<>();
+        for (Long planId: userPlanIds) {
+            EmotionActionPlan userPlan = emotionActionPlanRepository.findById(planId)
+                    .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
+            userPlans.add(userPlan);
+        }
+        return userPlans;
     }
 
     public String getUserSubscriptionStatus(Long userId) {

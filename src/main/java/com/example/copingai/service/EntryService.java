@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
@@ -147,17 +148,18 @@ public class EntryService {
     private void setEntryStreak (Long userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         LocalDateTime now = LocalDateTime.now();
-        if (user.getLastEntryTime() == null) {
-            // First entry ever, start the streak at 1
+        LocalDateTime lastEntryTime = user.getLastEntryTime();
+
+        if (lastEntryTime == null) {
             user.setStreak(1);
         } else {
-            LocalDateTime lastEntryTime = user.getLastEntryTime();
-            if (now.isBefore(lastEntryTime.plusHours(24))) {
-                // Entry is within the 24-hour window, increment streak
+            Duration duration = Duration.between(lastEntryTime, now);
+            long hours = duration.toHours();
+            if (hours >= 24 && hours < 48) {
                 user.setStreak(user.getStreak() + 1);
-            } else {
-                // Entry is more than 24 hours after the last one, streak is broken, start a new streak of 1
+            } else if (hours >= 48) {
                 user.setStreak(1);
             }
         }

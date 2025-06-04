@@ -2,6 +2,8 @@ package com.example.copingai.entities;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
+
 @Entity
 public class EmotionActionStep {
     @Id
@@ -19,6 +21,8 @@ public class EmotionActionStep {
     private String followUpPrompt;
     private String followUpContent;
     private String title;
+    private boolean toBeActivated = false; // Default to false
+    private Instant scheduledActivationTime;
 
     public EmotionActionStep() {
     }
@@ -113,5 +117,21 @@ public class EmotionActionStep {
 
     public void setFollowUpContent(String followUpContent) {
         this.followUpContent = followUpContent;
+    }
+
+    public boolean isToBeActivated() {
+        return toBeActivated;
+    }
+
+    public void setToBeActivated(boolean toBeActivated) {
+        this.toBeActivated = toBeActivated;
+    }
+
+    public Instant getScheduledActivationTime() {
+        return scheduledActivationTime;
+    }
+
+    public void setScheduledActivationTime(Instant scheduledActivationTime) {
+        this.scheduledActivationTime = scheduledActivationTime;
     }
 }

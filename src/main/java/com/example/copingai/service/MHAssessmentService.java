@@ -144,6 +144,10 @@ public class MHAssessmentService {
         // Scale total score out of 100 (max raw score is 30 questions * 5 = 150)
         int totalScaledScore = (int) Math.round((double) totalRawScore / 150 * 100);
         assessment.setAverageScore(totalScaledScore);
+        User user = userRepository.findById(assessment.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found."));
+        user.setCurrentDomainScore(totalScaledScore);
+        userRepository.save(user);
 
         // Calculate Domain Scores
         Map<String, Integer> domainRawScores = new HashMap<>();

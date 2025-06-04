@@ -49,7 +49,7 @@ public class User {
 
     private LocalDateTime lastLogin;
 
-    private Long wordsWritten;
+    private Long wordsWritten = 0L;
     private int streak = 0;
     private LocalDateTime lastEntryTime;
 
@@ -62,7 +62,7 @@ public class User {
     @CollectionTable(name = "user_assessments", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "assessment_id")
     private List<Long> assessmentIds = new ArrayList<>();
-    private Long currentEmotionPlanId; // Shortcut to active plan
+    private String currentEmotionPlan; // Shortcut to active plan
     private int currentDomainScore; // Optional: can store last average or active domain score
     private LocalDateTime lastAssessmentTaken;
     private LocalDateTime lastActionPlanStarted;
@@ -70,7 +70,7 @@ public class User {
     //constructors
 
     public User() {
-        this.remainingFreeEntries = 10;
+        this.remainingFreeEntries = 5;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -124,10 +124,10 @@ public class User {
         setAssessmentIds(this.assessmentIds);
     }
 
-    public void addEmotionPlan(Long planId) {
+    public void addEmotionPlan(Long planId, String currentEmotionPlan) {
         emotionPlanIds.add(planId);
         setEmotionPlanIds(this.emotionPlanIds);
-        setCurrentEmotionPlanId(planId);
+        setCurrentEmotionPlan(currentEmotionPlan);
     }
 
     public boolean deleteAnEntry(Long entryId){
@@ -199,12 +199,12 @@ public class User {
         this.assessmentIds = assessmentIds;
     }
 
-    public Long getCurrentEmotionPlanId() {
-        return currentEmotionPlanId;
+    public String getCurrentEmotionPlan() {
+        return currentEmotionPlan;
     }
 
-    public void setCurrentEmotionPlanId(Long currentEmotionPlanId) {
-        this.currentEmotionPlanId = currentEmotionPlanId;
+    public void setCurrentEmotionPlan(String currentEmotionPlan) {
+        this.currentEmotionPlan = currentEmotionPlan;
     }
 
     public int getCurrentDomainScore() {

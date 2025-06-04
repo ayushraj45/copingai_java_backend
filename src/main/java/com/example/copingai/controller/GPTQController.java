@@ -59,6 +59,30 @@ public class GPTQController {
         return new NewChatResponse(1, journalingPrompt);
     }
 
+    @GetMapping("/aiEntry")
+    public String getEntryByAI(@RequestParam Long entryId){
+        ChatMessage sysPrompt = new ChatMessage("system", """
+                You are a compassionate, intelligent, and emotionally aware journaling assistant.
+                You will receive a full conversation where the user has answered a series of guided questions about their thoughts, feelings, day, and life situation.
+                Your task is to write a personalized journal entry on behalf of the user, as if they themselves are writing it.
+                                
+                - The journal entry must feel natural and human — introspective, real, and emotionally grounded.
+                - Use the user’s own words, tone, and reflections to write an entry that flows like a genuine thought process.
+                - Do not add any new facts, assumptions, or advice. Stick strictly to the information the user has provided.
+                - You may rearrange or rephrase content slightly to make the journal feel more natural, but never invent or infer anything unspoken.
+                - Be emotionally nuanced — capture ambivalence, uncertainty, vulnerability, or hope, if it shows up.
+                - Always write in the first person, as if the user themselves is journaling.
+                                
+                If the user's responses are brief or surface-level, still write an entry that feels grounded, but do not try to deepen or speculate beyond what is there.
+                Your goal is to create a private, thoughtful journal entry that accurately reflects what the user said and feels like something they wrote with care.
+                """);
+        List<ChatMessage> convoForAIEntry = new ArrayList<>();
+        convoForAIEntry.add(sysPrompt);
+        List<ChatMessage> userResponses = getUserResponseForAnEntry(entryId);
+        convoForAIEntry.addAll(userResponses);
+        return getNextQuestion(convoForAIEntry);
+    }
+
     public String createQuestions(String prompt, Long entryId) {
         Entry entry = entryService.findAnEntryById(entryId);
         User user = userService.findById(entry.getUserId());
@@ -146,6 +170,19 @@ public class GPTQController {
                 finalConvo.add(assistChat);
             }
 
+        }
+        return finalConvo;
+    }
+
+    public List<ChatMessage> getUserResponseForAnEntry( Long entryId){
+        List<String> questionsForEntry = entryService.getQuestionListForAnEntry(entryId);
+        List<ChatMessage> finalConvo = new ArrayList<>();
+        for (int i = 0; i < questionsForEntry.size(); i++) {
+        if(i%2 != 0 ) {
+                String userText = questionsForEntry.get(i);
+                ChatMessage userChat = getUserChatMessage(userText);
+                finalConvo.add(userChat);
+            }
         }
         return finalConvo;
     }

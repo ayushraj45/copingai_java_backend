@@ -73,25 +73,9 @@ public class EmotionActionStepService {
 
         emotionActionStep.setActive(false);
         emotionActionStep.setCompleted(true);
+        updateUserWordCount(emotionActionStep.getId());
         emotionActionStepRepository.save(emotionActionStep); // Make sure to save the updated step
 
-        //Logic to add words written
-        java.util.function.Function<String, Integer> simpleWordCount = (text) -> {
-            if (text == null || text.trim().isEmpty()) {
-                return 0;
-            }
-            // Split by one or more whitespace characters
-            String[] words = text.trim().split("\\s+");
-            // The split method might return an array with one empty string if the input was just whitespace,
-            // so we check the length of the first element if the array is not empty.
-            if (words.length == 1 && words[0].isEmpty()) {
-                return 0;
-            }
-            return words.length;
-        };
-
-        Long wordLength = Long.valueOf(simpleWordCount.apply(emotionActionStep.getTextContent()));
-        updateUserWordCount(wordLength, emotionActionStep.getId());
         // --- Logic to set the next step ---
 
         List<Long> stepIds = plan.getEmotionActionStepIds(); // Get the ordered list of step IDs
@@ -121,13 +105,35 @@ public class EmotionActionStepService {
         return emotionActionStep;
     }
 
-    public void updateUserWordCount(Long wordCount, Long stepId){
-        EmotionActionPlan plan = emotionActionPlanRepository.findById(getPlanIdByStepId(stepId))
+    public void updateUserWordCount(Long stepId){
+
+        java.util.function.Function<String, Integer> simpleWordCount = (text) -> {
+            if (text == null || text.trim().isEmpty()) {
+                return 0;
+            }
+            // Split by one or more whitespace characters
+            String[] words = text.trim().split("\\s+");
+            // The split method might return an array with one empty string if the input was just whitespace,
+            // so we check the length of the first element if the array is not empty.
+            if (words.length == 1 && words[0].isEmpty()) {
+                return 0;
+            }
+            return words.length;
+        };
+
+        EmotionActionStep step = emotionActionStepRepository.findById(stepId)
+                .orElseThrow(() -> new EntityNotFoundException("Step not found"));
+        String wordCountText = step.getTextContent();
+
+        Long wordLength = Long.valueOf(simpleWordCount.apply(wordCountText));
+        Long planId = step.getEmotionActionPlanId();
+        EmotionActionPlan plan = emotionActionPlanRepository.findById(planId)
                 .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
         User user = userRepository.findById(plan.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         Long words = user.getWordsWritten();
-        user.setWordsWritten(words+wordCount);
+        words += wordLength;
+        user.setWordsWritten(words);
         userRepository.save(user);
     }
     public Long getPlanIdByStepId (Long stepId) {

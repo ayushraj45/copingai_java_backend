@@ -62,7 +62,7 @@ public class EmotionActionPlanService {
         Long createdPlanId = createdActionPlan.getId();
         User user = userRepository.findById(createdActionPlan.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Assessment not found"));
-        user.addEmotionPlan(createdPlanId);
+        user.addEmotionPlan(createdPlanId, "Purpose & Fulfillment");
         userRepository.save(user);
 
         List<Map<String, Object>> steps = Arrays.asList(
@@ -105,7 +105,7 @@ public class EmotionActionPlanService {
         Long createdPlanId = createdActionPlan.getId();
         User user = userRepository.findById(createdActionPlan.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Assessment not found"));
-        user.addEmotionPlan(createdPlanId);
+        user.addEmotionPlan(createdPlanId, "Relationships / Social Life");
         userRepository.save(user);
 
         List<Map<String, Object>> steps = Arrays.asList(
@@ -114,7 +114,7 @@ public class EmotionActionPlanService {
                 Map.of("emotionActionPlanId", createdPlanId, "title", "Write","actionText","Make a Mood Entry: Choose 'Love' or 'Gratitude' emotions", "domain", "Relationships / Social Life", "stepNumber",3, "active",false, "actionDay",3),
                 Map.of("emotionActionPlanId", createdPlanId, "title", "Reflect","actionText","What stops you from being fully open or authentic with others?", "domain", "Relationships / Social Life", "stepNumber",4, "active",false, "actionDay",4),
                 Map.of("emotionActionPlanId", createdPlanId, "title", "Decision","actionText","Make a short list of qualities you value in meaningful relationships.", "domain", "Relationships / Social Life", "stepNumber",5, "active",false, "actionDay",5),
-                Map.of("emotionActionPlanId", createdPlanId, "title", "Write","actionText","Reflection Day: Make an Explore Entry and Explore Relationships", "domain", "Relationships / Social Life", "stepNumber",6, "active",false, "actionDay",6),
+                Map.of("emotionActionPlanId", createdPlanId, "title", "Write","actionText","Reflection Day: Make an Explore Entry and Explore Relationships", "domain", " ", "stepNumber",6, "active",false, "actionDay",6),
                 Map.of("emotionActionPlanId", createdPlanId, "title", "Contemplate","actionText","How do you usually respond when you feel hurt or disconnected from someone?", "domain", "Relationships / Social Life", "stepNumber",7, "active",false, "actionDay",7),
                 Map.of("emotionActionPlanId", createdPlanId, "title", "Reflect","actionText","Are there relationships in your life that drain you more than they support you? Why?", "domain", "Relationships / Social Life", "stepNumber",8, "active",false, "actionDay",8),
                 Map.of("emotionActionPlanId", createdPlanId, "title", "Action","actionText","Write a plan for one way you could cultivate community or connection this month.", "domain", "Relationships / Social Life", "stepNumber",9, "active",false, "actionDay",9),
@@ -144,7 +144,7 @@ public class EmotionActionPlanService {
         Long createdPlanId = createdActionPlan.getId();
         User user = userRepository.findById(createdActionPlan.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Assessment not found"));
-        user.addEmotionPlan(createdPlanId);
+        user.addEmotionPlan(createdPlanId, "Emotional Regulation");
         userRepository.save(user);
 
         List<Map<String, Object>> steps = Arrays.asList(
@@ -183,7 +183,7 @@ public class EmotionActionPlanService {
         Long createdPlanId = createdActionPlan.getId();
         User user = userRepository.findById(createdActionPlan.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Assessment not found"));
-        user.addEmotionPlan(createdPlanId);
+        user.addEmotionPlan(createdPlanId, "Stress & Burnout");
         userRepository.save(user);
 
         List<Map<String, Object>> steps = Arrays.asList(
@@ -223,7 +223,7 @@ public class EmotionActionPlanService {
         Long createdPlanId = createdActionPlan.getId();
         User user = userRepository.findById(createdActionPlan.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Assessment not found"));
-        user.addEmotionPlan(createdPlanId);
+        user.addEmotionPlan(createdPlanId, "Sleep / Energy");
         userRepository.save(user);
 
         List<Map<String, Object>> steps = Arrays.asList(
@@ -262,7 +262,7 @@ public class EmotionActionPlanService {
         Long createdPlanId = createdActionPlan.getId();
         User user = userRepository.findById(createdActionPlan.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Assessment not found"));
-        user.addEmotionPlan(createdPlanId);
+        user.addEmotionPlan(createdPlanId, "Self-esteem / Self-talk");
         userRepository.save(user);
 
         List<Map<String, Object>> steps = Arrays.asList(

@@ -120,7 +120,28 @@ public class UserService {
         if(appUser.getFirebaseToken() != null){
 
         }
-        return appUserRepository.save(appUser);
+
+        User addedUser =  appUserRepository.save(appUser);
+        if(addedUser.getEmail() != null){
+            addWebAssessments(addedUser.getEmail(), addedUser.getId());
+        }
+        return addedUser;
+    }
+
+    public void addWebAssessments(String email, Long userId) {
+        System.out.println("email is:" + email);
+        System.out.println("user ID is:" + userId);
+        List<MHAssessment> assessmentsToAdd = mhAssessmentRepository.findAllAssessmentByEmail(email);
+        System.out.println("list of assessments is:" + assessmentsToAdd);
+        User userToUpdate = appUserRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        for (MHAssessment assessment: assessmentsToAdd
+             ) {
+            assessment.setUserId(userId);
+            userToUpdate.addAnAssessment(assessment.getId());
+            appUserRepository.save(userToUpdate);
+            mhAssessmentRepository.save(assessment);
+        }
     }
 
     public User updateAnAppUser(User appUser) {

@@ -63,4 +63,14 @@ public class MHAssessmentController {
     ) {
         return mhAssessmentService.uploadAnswersAndCalculateResults(assessmentId, answers);
     }
+
+    @Operation(summary = "Add email to an Assessment", description = "Adding user email from web assessments.")
+    @PostMapping("/{assessmentId}/addEmail/{email}") // Example path
+    @ResponseStatus(HttpStatus.OK) // Use OK for successful processing, CREATED is typically for creating new resources
+    public void addEmail(
+            @PathVariable Long assessmentId, // Get ID from path
+            @PathVariable String email // Get answers from the request body
+    ) {
+        mhAssessmentService.addEmailToAssessment(assessmentId, email);
+    }
 }

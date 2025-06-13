@@ -27,6 +27,7 @@ public class MHAssessment {
     private int emotionalRegulationScore;
     private int energyScore;
     private int selfEsteemScore;
+    private String email;
 
     public MHAssessment() {
         this.timeTaken = LocalDateTime.now();
@@ -130,5 +131,13 @@ public class MHAssessment {
 
     public Long getId() {
         return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

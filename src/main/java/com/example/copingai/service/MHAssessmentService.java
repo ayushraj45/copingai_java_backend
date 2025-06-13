@@ -228,4 +228,11 @@ public class MHAssessmentService {
        return mhAssessmentRepository.findById(assessmentId)
                .orElseThrow(() -> new EntityNotFoundException("MHAssessment with ID " + assessmentId + " not found."));
     }
+
+    public void addEmailToAssessment(Long assessmentId, String email) {
+        MHAssessment assessment = mhAssessmentRepository.findById(assessmentId)
+                .orElseThrow(() -> new EntityNotFoundException("MHAssessment with ID " + assessmentId + " not found."));
+        assessment.setEmail(email);
+        mhAssessmentRepository.save(assessment);
+    }
 }

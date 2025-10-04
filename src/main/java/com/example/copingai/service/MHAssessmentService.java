@@ -6,12 +6,16 @@ import com.example.copingai.data.UserRepository;
 import com.example.copingai.entities.AssessmentQuestion;
 import com.example.copingai.entities.MHAssessment;
 import com.example.copingai.entities.User;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -24,6 +28,9 @@ public class MHAssessmentService {
 
     @Autowired
     AssessmentQuestionService assessmentQuestionService;
+
+    @Autowired
+    EmailService emailService;
 
     @Autowired
     public MHAssessmentService (MHAssessmentRepository mhAssessmentRepository, UserRepository userRepository, AssessmentQuestionRepository assessmentQuestionRepository){
@@ -211,9 +218,77 @@ public class MHAssessmentService {
         }
 
         // Save the updated MHAssessment entity with all scores
-        mhAssessmentRepository.save(assessment);
+        MHAssessment scoredAssessment = mhAssessmentRepository.save(assessment);
+
+        Map<String, Integer> templateData = new HashMap<>();
+        templateData.put("purposeScore", domainScaledScores.getOrDefault("Purpose & Fulfillment", 0));
+        templateData.put("relationshipsScore", domainScaledScores.getOrDefault("Relationships / Social", 0));
+        templateData.put("emotionalRegulationScore", domainScaledScores.getOrDefault("Emotional Regulation", 0));
+        templateData.put("stressScore", domainScaledScores.getOrDefault("Stress & Burnout", 0));
+        templateData.put("energyScore", domainScaledScores.getOrDefault("Sleep / Energy", 0));
+        templateData.put("selfEsteemScore", domainScaledScores.getOrDefault("Self-esteem / Self-talk", 0));
+        templateData.put("averageScore", scoredAssessment.getAverageScore());
+
+        System.out.println("Average Score at template" + (templateData.get("averageScore")));
+
+        String email = scoredAssessment.getEmail();
+        if (email != null && !email.trim().isEmpty()) {
+            String resultHtml;
+
+        try {
+            resultHtml = generateAssessmentResultHtml(templateData, lowestDomain);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            System.out.println("we are at TRY to send the email");
+            emailService.sendAssessmentResults(
+                    email,
+                    "Your Coping.AI Mental Health Assessment Results",
+                    resultHtml
+            );
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }}
 
         return lowestDomain;
+    }
+
+    private String loadTemplate() throws IOException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("result_template.html")) {
+            if (inputStream == null) {
+                throw new IOException("Template file not found!");
+            }
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private String generateAssessmentResultHtml(Map<String, Integer> data, String lowest) throws IOException {
+        String template = loadTemplate();
+
+        // Retrieve scores from your data object (e.g., a DTO from your service)
+        int averageScore = data.get("averageScore");
+        System.out.println("Average score here in generate: " + averageScore);
+        // --- Calculations for the Circular Progress Bar ---
+        final double radius = 74; // (160px size - 12px stroke * 2) / 2
+        final double circumference = 2 * Math.PI * radius;
+        double offset = circumference - (averageScore / 100.0) * circumference;
+
+        // --- String replacements ---
+        String html = template
+                .replace("{{averageScore}}", String.valueOf(averageScore))
+                .replace("{{circumference}}", String.valueOf(circumference))
+                .replace("{{circularProgressOffset}}", String.valueOf(offset))
+                .replace("{{purposeScore}}", String.valueOf(data.getOrDefault("purposeScore", 0)))
+                .replace("{{relationshipsScore}}", String.valueOf(data.getOrDefault("relationshipsScore", 0)))
+                .replace("{{stressScore}}", String.valueOf(data.getOrDefault("stressScore", 0)))
+                .replace("{{emotionalRegulationScore}}", String.valueOf(data.getOrDefault("emotionalRegulationScore", 0)))
+                .replace("{{energyScore}}", String.valueOf(data.getOrDefault("energyScore", 0)))
+                .replace("{{selfEsteemScore}}", String.valueOf(data.getOrDefault("selfEsteemScore", 0)))
+                .replace("{{suggestedPath}}", lowest);
+
+        return html;
     }
 
     public List<AssessmentQuestion> getQuestionsById (Long assessmentId) {
@@ -234,5 +309,7 @@ public class MHAssessmentService {
                 .orElseThrow(() -> new EntityNotFoundException("MHAssessment with ID " + assessmentId + " not found."));
         assessment.setEmail(email);
         mhAssessmentRepository.save(assessment);
+
+
     }
 }

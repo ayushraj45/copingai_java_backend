@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Assessment Results - Coping.ai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* You can define your custom brand colors here.
+         These are guesses based on the names in your code.
+         Update these hex codes to match your brand palette.
+        */
+        :root {
+            --brand-light: #F7FAFC; /* Example: A light gray/blue */
+            --brand-dark: #2D3748;  /* Example: A dark charcoal */
+            --brand-highlight: #4299E1; /* Example: A nice blue */
+            --brand-accent-light: #EBF8FF; /* Example: A very light blue */
+        }
+        /* Applying the custom colors to Tailwind's utility classes */
+        .bg-brand-light { background-color: var(--brand-light); }
+        .text-brand-dark { color: var(--brand-dark); }
+        .text-brand-dark\/70 { color: rgba(45, 55, 72, 0.7); }
+        .text-brand-dark\/80 { color: rgba(45, 55, 72, 0.8); }
+        .text-brand-dark\/60 { color: rgba(45, 55, 72, 0.6); }
+        .text-brand-highlight { color: var(--brand-highlight); }
+        .border-brand-highlight { border-color: var(--brand-highlight); }
+        .bg-brand-accent-light { background-color: var(--brand-accent-light); }
+        .hover\:underline:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="bg-brand-light">
+<div class="min-h-screen py-8 md:py-12 px-4">
+    <div class="container mx-auto max-w-3xl bg-white shadow-xl rounded-lg p-6 md:p-10">
+        <header class="text-center border-b border-gray-200 pb-6 mb-6 md:mb-8 relative">
+            <h1 class="text-3xl md:text-4xl font-bold text-brand-dark mb-2">Your Assessment Results</h1>
+            <p class="text-brand-dark/70">Here's a summary of your well-being assessment.</p>
+        </header>
+
+        <section class="mb-8 md:mb-10">
+            <h2 class="text-xl md:text-2xl font-semibold text-brand-dark mb-4 text-center">Overall Well-being Score</h2>
+            <div class="flex justify-center mb-6">
+                <div class="relative" style="width: 160px; height: 160px;">
+                    <svg class="transform -rotate-90" width="160" height="160">
+                        <circle class="text-gray-200" stroke="currentColor" stroke-width="12" fill="transparent" r="74" cx="80" cy="80"></circle>
+                        <circle class="text-brand-highlight" stroke="currentColor" stroke-width="12"
+                                stroke-dasharray="{{circumference}}"
+                                stroke-dashoffset="{{circularProgressOffset}}"
+                                stroke-linecap="round" fill="transparent" r="74" cx="80" cy="80"
+                                style="transition: stroke-dashoffset 0.5s ease-out;"></circle>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-3xl font-bold text-brand-dark">{{averageScore}}</span>
+                        <span class="text-sm font-medium text-brand-dark/70 ml-1">%</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-brand-dark/80 max-w-lg mx-auto">
+                This score represents a general overview of your current mental well-being based on your responses.
+            </p>
+        </section>
+
+        <section class="mb-8 md:mb-10">
+            <h2 class="text-xl md:text-2xl font-semibold text-brand-dark mb-6 text-center">Domain Breakdown</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-brand-dark">Purpose & Fulfillment</span>
+                        <a
+                                href="https://apps.apple.com/gb/app/coping-ai/id6739732540"
+                                class="text-sm font-semibold text-sky-500 underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                        >
+                            Click here to see
+                        </a>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-sky-500 h-2.5 rounded-full" style="width: {{purposeScore}}%;"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-brand-dark">Relationships / Social</span>
+                        <a
+                                href="https://apps.apple.com/gb/app/coping-ai/id6739732540"
+                                class="text-sm font-semibold text-sky-500 underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                        >
+                            Click here to see
+                        </a>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-pink-500 h-2.5 rounded-full" style="width: {{relationshipsScore}}%;"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-brand-dark">Stress & Burnout</span>
+                        <a
+                                href="https://apps.apple.com/gb/app/coping-ai/id6739732540"
+                                class="text-sm font-semibold text-sky-500 underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                        >
+                            Click here to see
+                        </a>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-red-500 h-2.5 rounded-full" style="width: {{stressScore}}%;"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-brand-dark">Emotional Regulation</span>
+                        <a
+                                href="https://apps.apple.com/gb/app/coping-ai/id6739732540"
+                                class="text-sm font-semibold text-sky-500 underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                        >
+                            Click here to see
+                        </a>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-teal-500 h-2.5 rounded-full" style="width: {{emotionalRegulationScore}}%;"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-brand-dark">Energy & Sleep</span>
+                        <a
+                                href="https://apps.apple.com/gb/app/coping-ai/id6739732540"
+                                class="text-sm font-semibold text-sky-500 underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                        >
+                            Click here to see
+                        </a>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-purple-500 h-2.5 rounded-full" style="width: {{energyScore}}%;"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-brand-dark">Self-esteem / Self-talk</span>
+                        <a
+                                href="https://apps.apple.com/gb/app/coping-ai/id6739732540"
+                                class="text-sm font-semibold text-sky-500 underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                        >
+                            Click here to see
+                        </a>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-yellow-500 h-2.5 rounded-full" style="width: {{selfEsteemScore}}%;"></div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-center text-brand-dark/60 mt-4">
+                Note: Coping.ai can help with self-managing each of these domains with guided journaling and AI insights.
+            </p>
+        </section>
+
+        <section class="text-center bg-brand-accent-light p-6 rounded-lg">
+            <h2 class="text-xl md:text-2xl font-semibold text-brand-dark mb-3">Suggested Next Step</h2>
+            <div class="flex items-center justify-center text-brand-dark mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mr-2 text-yellow-500">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L1.875 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.25 12L17.437 9.154a4.5 4.5 0 00-3.09-3.09L12 5.25l-.813 2.846a4.5 4.5 0 00-3.09 3.09L5.25 12l2.846.813a4.5 4.5 0 003.09 3.09L12 18.75l.813-2.846a4.5 4.5 0 003.09-3.09L18.25 12z"></path>
+                </svg>
+                <p class="text-lg font-medium">{{suggestedPath}}</p>
+            </div>
+            <p class="text-brand-dark/80 mb-6">
+                Your personalised 14 Day Guided Path for "{{suggestedPath}}" domain is now available! You can now access your scores and more guided journaling paths with Coping.Ai to manage your emotions. Click below to take control today!
+            </p>
+            <a href='https://apps.apple.com/gb/app/coping-ai/id6739732540' class="inline-block px-8 py-3 text-lg font-semibold text-white bg-brand-highlight rounded-lg shadow-md hover:opacity-90 transition-opacity">
+                Explore {{suggestedPath}}
+            </a>
+        </section>
+
+        <footer class="mt-8 text-center">
+            <p class="text-sm text-brand-dark/60">
+                Remember, these results are a snapshot and a tool for self-reflection, not a diagnosis.
+                If you have concerns, please consult a healthcare professional.
+            </p>
+        </footer>
+    </div>
+</div>
+</body>
+</html>

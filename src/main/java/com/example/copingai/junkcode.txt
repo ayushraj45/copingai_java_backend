@@ -1,0 +1,277 @@
+    public String createJournalingExercise(@RequestParam List<ChatMessage> convo) {
+        List<ChatMessage> conversation = new ArrayList<>();
+
+        OpenAiService service = new OpenAiService(apiKey, Duration.ofSeconds(60));
+        ChatMessage message1 = new ChatMessage("system", "You are a guided journaling expert. Read this conversation and suggest one Journaling Prompt which will help the user reflect, learn and feel the benefits of journaling. Make sure to give plenty of content to write about. You must ONLY respond with the journaling prompt.");
+        conversation.add(message1);
+        conversation.addAll(convo);
+
+        ChatCompletionRequest completionRequest = ChatCompletionRequest
+                .builder()
+                .messages(conversation)
+                .model(model)
+                .temperature(1.0)
+                .maxTokens(1500)
+                .frequencyPenalty(0.0)
+                .presencePenalty(0.0)
+                .n(1)
+                .build();
+        List<ChatCompletionChoice> choices = service.createChatCompletion(completionRequest).getChoices();
+        return choices.get(0).getMessage().getContent();
+//        StringBuilder returnStringBuilder = new StringBuilder();
+//        for (ChatCompletionChoice choice : choices) {
+//            returnStringBuilder.append(choice.getMessage().getContent()).append(System.lineSeparator());
+//        }
+//
+//        return returnStringBuilder.toString();
+    }
+
+
+
+
+    import { StyleSheet, Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Keyboard, Animated } from 'react-native'
+    import React, { useEffect, useRef, useState } from 'react'
+    import RegisterBG from '../../assets/icons/RegisterBg'
+    import { RFPercentage } from 'react-native-responsive-fontsize'
+    import { router } from 'expo-router'
+    import { FIREBASE_AUTH } from '../firebaseConfig'
+    import { createUserWithEmailAndPassword } from 'firebase/auth'
+    import { useGlobalContext } from '../context/GlobalProvider'
+
+    const register = () => {
+
+        const { setUser } = useGlobalContext();
+
+        const [email, setEmail] = useState('')
+        const [password, setPassword] = useState('')
+        const [loading, setLoading] = useState(false)
+        const auth = FIREBASE_AUTH;
+        const scrollViewRef = useRef(null);
+        const scrollOffset = useRef(new Animated.Value(0)).current;
+
+        useEffect(() => {
+          const keyboardWillShow = Keyboard.addListener('keyboardWillShow', () => {
+            Animated.timing(scrollOffset, {
+              toValue: 10, // Adjust this value to control how much it scrolls up
+              duration: 300,
+              useNativeDriver: true,
+            }).start();
+          });
+
+          const keyboardWillHide = Keyboard.addListener('keyboardWillHide', () => {
+            Animated.timing(scrollOffset, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }).start();
+          });
+
+          return () => {
+            keyboardWillShow.remove();
+            keyboardWillHide.remove();
+          };
+        }, []);
+
+        const signUp = async () => {
+          try {
+            const response = await createUserWithEmailAndPassword (auth, email, password);
+            const resJson = JSON.stringify(response, null, 2)
+            console.log('create acc success '+ resJson)
+            console.log('resJson our params: '+ response?.user?.uid + '  ' + response?.user?.email)
+            const createdUser = await createUser(response?.user?.uid, response?.user?.email)
+           console.log('sql user ' + createdUser )
+             setUser(createdUser)
+            // router.push({
+            //   pathname: `/homepage`
+            // });
+          } catch (error) {
+            console.log('Error at firebase aAuth; '+error)
+          }
+        }
+
+        const createUser = async (firebaseUID, email) => {
+
+          const updatedUserData = {
+            "maxQuestions": 5,
+            "email": email,
+            "providerId": firebaseUID,
+            "subscriptionStatus": "string",
+          }
+
+
+          console.log(updatedUserData)
+
+          try {
+                const response = await fetch('http://192.168.1.127:8080/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedUserData),
+                });
+                const data = await response.json();
+                console.log(data);
+                console.log('Successfully added user at ADD User ' + data.email);
+                return data;
+            } catch (error) {
+                return console.error('Error adding due to: ' + error);
+            }
+        };
+
+
+
+
+        return (
+          <View style={styles.main}>
+            <View style={StyleSheet.absoluteFill}>
+              <RegisterBG />
+            </View>
+
+            <Animated.ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={[
+              styles.scrollViewContent,
+              { transform: [{ translateY: scrollOffset.interpolate({
+                inputRange: [0, 50],
+                outputRange: [0, -50],
+              }) }] }
+            ]}
+          >
+                <View style={styles.registerContainer}>
+                  <View style={styles.registerText}>
+                    <Text style={{fontSize: RFPercentage(3.5)}} className="font-bSemi">Register</Text>
+                  </View>
+                  <View style={styles.formContainer}>
+                    <View style={styles.inputter}>
+                      <Text style={{fontSize: RFPercentage(1.5)}} className="font-cLight">Username</Text>
+                      <TextInput style={styles.inputBox}/>
+                    </View>
+                    <View style={styles.inputter}>
+                      <Text style={{fontSize: RFPercentage(1.5)}} className="font-cLight">Email</Text>
+                      <TextInput
+                        onChangeText={(text) => setEmail(text)}
+                        style={styles.inputBox}
+                      />
+                    </View>
+                    <View style={styles.inputter}>
+                      <Text style={{fontSize: RFPercentage(1.5)}} className="font-cLight">Password</Text>
+                      <TextInput
+                        secureTextEntry={true}
+                        onChangeText={(text) => setPassword(text)}
+                        style={styles.inputBox}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.bottomButtonsContainer}>
+                  <View style={styles.loginTextContainer}>
+                    <Text style={[styles.loginText, {fontSize: RFPercentage(1.7)}]} className="font-cLight">Already a Member?</Text>
+                    <TouchableOpacity onPress={() => router.push("/login")}>
+                      <Text style={[styles.loginText, {fontSize: RFPercentage(1.9), fontWeight: 'bold'}]} className="font-cLight"> Login</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <TouchableOpacity onPress={signUp}>
+                    <View style={styles.registerButton}>
+                      <Text style={{fontSize: RFPercentage(2.3)}} className="font-bSemi text-[#E2E9E2]">Register</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+                </Animated.ScrollView>
+          </View>
+        )
+        }
+
+        const styles = StyleSheet.create({
+          main: {
+            flex: 1,
+          },
+
+          keyboardAvoidingView: {
+            flex: 1,
+          },
+
+          scrollViewContent: {
+            flexGrow: 1,
+            justifyContent: 'space-between',
+            padding: 20,
+          },
+          registerContainer: {
+            // ... your existing styles ...
+          },
+
+          bottomButtonsContainer: {
+            // ... your existing styles ...
+            marginTop: 20, // Add some space above the bottom buttons
+          },
+          contentContainer: {
+            flex: 1,
+            justifyContent: 'space-between',
+          },
+
+          keyboardAvoidingView: {
+            flex: 1,
+            justifyContent: 'center',
+          },
+          main: {
+            flex: 1,
+            backgroundColor: "#FEF8EC",
+             flexDirection:'column'
+          },
+          registerContainer:{
+            position: 'absolute',
+            top: 50,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            flexDirection:'column',
+            justifyContent: 'center',
+            marginHorizontal:20,
+            zIndex: 2
+
+          },
+          registerText:{
+            flexDirection:'row',
+            justifyContent:'flex-start',
+          },
+          formContainer:{
+            // paddingVertical:15,
+            flexDirection:'column',
+          },
+          inputter:{
+            paddingVertical:10,
+          },
+          inputBox:{
+            borderRadius: 10,
+            borderWidth: 1,
+            height:35,
+            borderColor: '#4FC4E7',
+          },
+          bottomButtonsContainer: {
+            position: 'absolute',
+            bottom: 100,
+            left: 20,
+            right: 20,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end', // This aligns items to the bottom
+          },
+          loginTextContainer: {
+            flexDirection: 'row',
+            alignItems: 'baseline', // This aligns text baselines
+          },
+          loginText: {
+            color: '#E2E9E2',
+          },
+          registerButton: {
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: '#E2E9E2',
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+          }
+        })
+
+    export default register;
+
+
